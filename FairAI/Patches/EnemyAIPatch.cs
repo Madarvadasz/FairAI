@@ -1,7 +1,69 @@
-﻿namespace FairAI.Patches
+﻿using GameNetcodeStuff;
+using UnityEngine;
+
+namespace FairAI.Patches
 {
     internal class EnemyAIPatch
     {
+        private static void BaseHitEnemy(EnemyAI ai, int force, PlayerControllerB playerWhoHit, bool playHitSFX, int hitID)
+        {
+            if (ai == null)
+            {
+                return;
+            }
+
+            if (playHitSFX && ai.enemyType.hitBodySFX != null && !ai.isEnemyDead)
+            {
+                ai.creatureSFX.PlayOneShot(ai.enemyType.hitBodySFX);
+                WalkieTalkie.TransmitOneShotAudio(ai.creatureSFX, ai.enemyType.hitBodySFX);
+            }
+
+            if (ai.creatureVoice != null)
+            {
+                ai.creatureVoice.PlayOneShot(ai.enemyType.hitEnemyVoiceSFX);
+            }
+
+            if (ai.debugEnemyAI)
+            {
+                Debug.Log($"Enemy #{ai.thisEnemyIndex} was hit with force of {force}");
+            }
+
+            if (playerWhoHit != null)
+            {
+                Debug.Log($"Client #{playerWhoHit.playerClientId} hit enemy {ai.agent.transform.name} with force of {force}.");
+            }
+        }
+
+        public static bool BrackenHitEnemyPatch(ref FlowermanAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false, int hitID = -1)
+        {
+            BaseHitEnemy(__instance, force, playerWhoHit, playHitSFX, hitID);
+            if (__instance.isEnemyDead)
+            {
+                return false;
+            }
+
+            __instance.enemyHP -= force;
+            if (__instance.IsOwner)
+            {
+                if (__instance.enemyHP <= 0)
+                {
+                    __instance.KillEnemyOnOwnerClient();
+                    return false;
+                }
+
+                if (!playerWhoHit)
+                {
+                    Plugin.logger.LogDebug("Bracken was hit by another enemy. Not changing its anger meter");
+                    return false;
+                }
+
+                __instance.angerMeter = 11f;
+                __instance.angerCheckInterval = 1f;
+                __instance.AddToAngerMeter(0.1f);
+            }
+
+            return false;
+        }
         /*
         public static void DoAIIntervalPatch(ref EnemyAI __instance)
         {

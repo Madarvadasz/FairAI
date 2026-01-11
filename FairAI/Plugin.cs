@@ -107,6 +107,7 @@ namespace FairAI
             CreateHarmonyPatch(harmony, typeof(Landmine), "OnTriggerEnter", null, typeof(MineAIPatch), nameof(MineAIPatch.PatchOnTriggerEnter), false);
             CreateHarmonyPatch(harmony, typeof(Landmine), "OnTriggerExit", null, typeof(MineAIPatch), nameof(MineAIPatch.PatchOnTriggerExit), false);
             CreateHarmonyPatch(harmony, typeof(Landmine), "Detonate", null, typeof(MineAIPatch), nameof(MineAIPatch.DetonatePatch), false);
+            CreateHarmonyPatch(harmony, typeof(FlowermanAI), "HitEnemy", [typeof(int), typeof(PlayerControllerB), typeof(bool), typeof(int)], typeof(EnemyAIPatch), nameof(EnemyAIPatch.BrackenHitEnemyPatch), true);
             await WaitForProcess(1);
             GetTurretSettings();
             logger.LogInfo("Fair AI initiated!");
