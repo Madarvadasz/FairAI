@@ -64,6 +64,35 @@ namespace FairAI.Patches
 
             return false;
         }
+
+        public static bool HoardingBugHitEnemyPatch(ref HoarderBugAI __instance, int force = 1, PlayerControllerB playerWhoHit = null, bool playHitSFX = false, int hitID = -1)
+        {
+            BaseHitEnemy(__instance, force, playerWhoHit, playHitSFX, hitID);
+            if (__instance.isEnemyDead)
+            {
+                return false;
+            }
+
+            __instance.creatureAnimator.SetTrigger("damage");
+
+            if (!playerWhoHit)
+            {
+                Plugin.logger.LogDebug("Hoarding bug was hit by another enemy. Not changing its anger meter");
+            }
+            else
+            {
+                __instance.angryAtPlayer = playerWhoHit;
+                __instance.angryTimer += 18f;
+            }
+
+            __instance.enemyHP -= force;
+            if (__instance.IsOwner && __instance.enemyHP <= 0)
+            {
+                __instance.KillEnemyOnOwnerClient();
+            }
+
+            return false;
+        }
         /*
         public static void DoAIIntervalPatch(ref EnemyAI __instance)
         {
