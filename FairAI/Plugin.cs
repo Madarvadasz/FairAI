@@ -128,30 +128,26 @@ namespace FairAI
             if (enemy != null)
             {
                 EnemyAI ai = enemy.mainScript;
-                if (enemy.mainScript != null)
+                if (ai != null)
                 {
+                    float[] enemy_speed = GetSpeeds(enemy);
+                    if (enemy_speed != null)
+                    {
+                        return enemy_speed;
+                    }
+
                     EnemyType eType = ai.enemyType;
-                    string name = RemoveInvalidCharacters(eType.enemyName);
                     if (eType != null)
                     {
-                        if (GetSpeeds(enemy) == null)
-                        {
-                            NavMeshAgent agent = ai.GetComponentInChildren<NavMeshAgent>();
-                            if (agent != null)
-                            {
-                                speeds.Add(name, [agent.speed, agent.acceleration]);
-                                return speeds[name];
-                            }
-                            else
-                            {
-                                speeds.Add(name, [1, 1]);
-                                return speeds[name];
-                            }
-                        }
-                        else
-                        {
-                            return speeds[name];
-                        }
+                        string name = RemoveInvalidCharacters(eType.enemyName);
+                        NavMeshAgent agent = ai.GetComponentInChildren<NavMeshAgent>();
+                        enemy_speed = (agent != null) ? [agent.speed, agent.acceleration] : [1, 1];
+                        speeds.Add(name, enemy_speed);
+                        return speeds[name];
+                    }
+                    else
+                    {
+                        logger.LogWarning("No EnemyType To Get Speeds!");
                     }
                 }
                 else

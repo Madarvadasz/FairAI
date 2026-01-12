@@ -171,16 +171,24 @@ namespace FairAI.Patches
             {
                 EnemyAICollisionDetect enemyAI = other.gameObject.GetComponent<EnemyAICollisionDetect>();
                 EnemyAI ai = enemyAI.mainScript;
+                int instanceID = enemyAI.GetInstanceID();
+
+                if (!Plugin.positions.TryGetValue(instanceID, out Vector3 position))
+                {
+                    return false;
+                }
+
                 float[] speeds = Plugin.SpeedAndAccelerationEnemyList(enemyAI);
 
                 ai.agent.speed = speeds[0];
                 ai.agent.acceleration = speeds[1];
+
                 if (Plugin.GetBool("Mobs", Plugin.RemoveInvalidCharacters(ai.enemyType.enemyName) + ".Quicksand Kill"))
                 {
-                    ai.transform.position = new Vector3(ai.transform.position.x, Plugin.positions[enemyAI.GetInstanceID()].y, ai.transform.position.z);
+                    ai.transform.position = new Vector3(ai.transform.position.x, position.y, ai.transform.position.z);
                     ai.SyncPositionToClients();
-                    Plugin.sinkingValues[enemyAI.GetInstanceID()] = 0f;
-                    Plugin.sinkingProgress[enemyAI.GetInstanceID()] = 0;
+                    Plugin.sinkingValues[instanceID] = 0f;
+                    Plugin.sinkingProgress[instanceID] = 0;
                 }
             }
             else
